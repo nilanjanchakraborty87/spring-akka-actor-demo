@@ -1,0 +1,6 @@
+pipelines:
+  - name: App1Pipeline
+    description: This pipeline is for process App1. All messages coming from App1 should be
+    processed via this pipeline
+    inbound-channel: App1Channel
+    outbound-channel: MyChannel
