@@ -11,7 +11,7 @@ import io.nats.client.api.StreamInfo;
 import io.nats.client.impl.NatsMessage;
 import io.nats.client.support.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -28,9 +28,14 @@ import java.util.concurrent.Executors;
 @Service
 public class PipelineACKPubliher {
 
-    private static final String LOCAL_NATS_SERVER = "nats://localhost:4222";
-    private static final String DEFAULT_STREAM = "akka-demo";
-    private static final String DEFAULT_SUBJECT = "akka-demo-ack-events";
+    @Value("${nats.server:nats://localhost:4222}")
+    private String natsServer;
+
+    @Value("${nats.stream:akka-demo}")
+    private String natsStream;
+
+    @Value("${nats.subject:akka-demo-ack-events}")
+    private String natsSubject;
     private ObjectMapper jsonMapper = new ObjectMapper();
     private Connection nc;
     private JetStream js;
@@ -40,15 +45,15 @@ public class PipelineACKPubliher {
     @PostConstruct
     private void init() {
         try {
-            nc = Nats.connect(LOCAL_NATS_SERVER);
+            nc = Nats.connect(natsServer);
 
             JetStreamManagement jsm = nc.jetStreamManagement();
 
             // Create a stream, here will use an in-memory storage type, and one subject
             StreamConfiguration sc = StreamConfiguration.builder()
-                    .name(DEFAULT_STREAM)
+                    .name(natsStream)
                     .storageType(StorageType.Memory)
-                    .subjects(DEFAULT_SUBJECT)
+                    .subjects(natsSubject)
                     .build();
 
             // Add a stream.
@@ -69,7 +74,7 @@ public class PipelineACKPubliher {
         var appAck = ACKEvent.of("Acknowledgement for received message", i.getId(), UUID.randomUUID().toString());
         try {
             Message msg = NatsMessage.builder()
-                    .subject(DEFAULT_SUBJECT)
+                    .subject(natsSubject)
                     .data(jsonMapper.writeValueAsString(appAck), StandardCharsets.UTF_8)
                     .build();
 
