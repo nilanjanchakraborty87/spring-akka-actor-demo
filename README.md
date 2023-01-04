@@ -13,7 +13,7 @@ I'd set it as 20 and got a good performance in r2dbc
 connect to mssql db at startup. Please make sure to provide a 
 valid database details in `application.properties`.
   <br/><br/>
- Remember to create a new database named as `akka_demo`
+ Remember to create a new database named as `akka_demo` before starting the service.
   <br/><br/>
  You can also run a dockerized mssql in your local using the 
  below command - <br/><br/>
